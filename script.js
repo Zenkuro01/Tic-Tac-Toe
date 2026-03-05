@@ -10,24 +10,34 @@ function Player(symbol) {
   return { getSymbol };
 }
 
+const Symbol = {
+  X: "X",
+  O: "O",
+};
+
 /* ============================= */
 /*        Gameboard Object       */
 /* ============================= */
 
-function Gameboard(board) {
-  const gameboard = board;
+function Gameboard() {
+  const board = Array(9).fill(null);
 
-  const displayGameboard = () => {
-    console.log(`Current board:`, gameboard);
+  const getBoard = () => {
+    return [...board];
   };
 
   const getCell = (index) => {
-    return gameboard.at(index);
+    return board.at(index);
+  };
+
+  const isCellEmpty = (index) => {
+    return board.at(index) === null;
   };
 
   const setCell = (index, symbol) => {
     if (!Number.isInteger(index)) {
       console.error("Cell Index not a number");
+      return false;
     }
 
     if (index < 0 || index > 8) {
@@ -36,30 +46,38 @@ function Gameboard(board) {
     }
 
     if (isCellEmpty(index)) {
-      gameboard[index] = symbol;
+      board[index] = symbol;
       return true;
-    } else return false;
+    }
+
+    return false;
   };
 
-  const isCellEmpty = (index) => {
-    return gameboard.at(index) === null;
+  const isBoardFull = () => {
+    return !board.includes(null);
   };
 
-  const isGameboardFull = () => {
-    return !gameboard.includes(null);
+  return {
+    getBoard,
+    getCell,
+    setCell,
+    isCellEmpty,
+    isBoardFull,
   };
-
-  return { displayGameboard, getCell, setCell, isCellEmpty, isGameboardFull };
 }
 
 /* ============================= */
 /*           Game Object         */
 /* ============================= */
 
-function Game(playerX, playerO) {
+const Game = (function () {
+  const playerX = Player(Symbol.X);
+  const playerO = Player(Symbol.O);
+
   let gameboard = null;
   let currentPlayer = null;
   let gameOver = false;
+
   const winningPatterns = [
     [0, 1, 2],
     [3, 4, 5],
@@ -71,47 +89,44 @@ function Game(playerX, playerO) {
     [2, 4, 6],
   ];
 
-  // Create empty Gameboard
-  const start = () => {
-    gameboard = Gameboard(Array(9).fill(null));
+  // Create a Gameboard with an empty board
+  const init = () => {
+    gameboard = Gameboard();
     currentPlayer = playerX;
-
-    console.log("The game is starting.");
-    gameboard.displayGameboard();
   };
+
+  init();
 
   // Set next Player for the turn
   const switchTurn = () => {
-    if (currentPlayer == playerX) currentPlayer = playerO;
+    if (currentPlayer === playerX) currentPlayer = playerO;
     else currentPlayer = playerX;
   };
 
   // Play next round
   const playRound = (index) => {
     if (gameOver) {
-      console.log("The game is already over. Please start a new game.");
-      return 0;
+      return "invalid";
     }
-
-    console.log(`Player's ${currentPlayer.getSymbol()} turn.`);
 
     if (!gameboard.setCell(index, currentPlayer.getSymbol())) {
       console.error("The cell must be empty and a number between 0-8");
-      return 1;
+      return "invalid";
     }
 
-    console.log("Symbol placed.");
-    gameboard.displayGameboard();
-
-    // Check win/draw condition
+    // Check win condition
     if (checkWin(currentPlayer.getSymbol())) {
-      console.log(`Player ${currentPlayer.getSymbol()} Won!!!`);
       gameOver = true;
+      return "win";
     } else {
-      if (checkDraw()) {
-        console.log("It's a draw.");
+      // Check draw condition
+      if (gameboard.isBoardFull()) {
         gameOver = true;
-      } else switchTurn();
+        return "draw";
+      } else {
+        switchTurn();
+        return "continue";
+      }
     }
   };
 
@@ -131,34 +146,64 @@ function Game(playerX, playerO) {
     return false;
   };
 
-  const checkDraw = () => {
-    return gameboard.isGameboardFull();
+  const getBoard = () => {
+    return gameboard.getBoard();
   };
 
   const isGameOver = () => {
     return gameOver;
   };
 
-  return { playRound, start, isGameOver };
-}
+  return { playRound, getBoard, isGameOver };
+})();
 
 /* ============================= */
-/*          Code execution       */
+/*   DisplayController module    */
 /* ============================= */
 
-const playerX = Player("X");
-const playerO = Player("O");
+const DisplayController = (function () {
+  const cellElements = document.querySelectorAll(".cell");
 
-const game = Game(playerX, playerO);
-game.start();
+  const svgMap = {
+    X: `
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <line x1="20" y1="20" x2="80" y2="80" stroke="currentColor" stroke-width="12" stroke-linecap="round"/>
+        <line x1="80" y1="20" x2="20" y2="80" stroke="currentColor" stroke-width="12" stroke-linecap="round"/>
+      </svg>  
+    `,
+    O: `
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="32" stroke="currentColor" stroke-width="12" fill="none"/>
+      </svg>
+    `,
+  };
 
-// while (!game.isGameOver()) {
-//   game.playRound(Math.floor(Math.random() * 9));
-// }
+  const renderBoard = () => {
+    const board = Game.getBoard();
 
-// stopping after some iterations to avoid infinity loops in testing
-let i = 0;
-while (!game.isGameOver() && i <= 200) {
-  game.playRound(Math.floor(Math.random() * 9));
-  i++;
-}
+    cellElements.forEach((cell) => {
+      const index = Number(cell.dataset.index);
+      const symbol = board[index];
+
+      cell.innerHTML = svgMap[symbol] || "";
+    });
+  };
+
+  const handleCellClick = (event) => {
+    const cell = event.currentTarget;
+    const index = Number(cell.dataset.index);
+
+    const response = Game.playRound(index);
+
+    // TODO Render UI based on the response
+    console.log(response);
+
+    renderBoard();
+  };
+
+  cellElements.forEach((cell) => {
+    cell.addEventListener("click", handleCellClick);
+  });
+
+  renderBoard();
+})();

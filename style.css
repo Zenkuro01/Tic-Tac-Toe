@@ -1,0 +1,197 @@
+/* ============================= */
+/*            CSS RESET          */
+/* ============================= */
+
+/* 1. Use a more-intuitive box-sizing model */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* 2. Remove default margin */
+* {
+  margin: 0;
+}
+
+/* 3. Enable keyword animations */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    interpolate-size: allow-keywords;
+  }
+}
+
+body {
+  /* 4. Add accessible line-height */
+  line-height: 1.5;
+  /* 5. Improve text rendering */
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 6. Improve media defaults */
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* 7. Inherit fonts for form controls */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+/* 8. Avoid text overflows */
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+
+/* 9. Improve line wrapping */
+p {
+  text-wrap: pretty;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  text-wrap: balance;
+}
+
+/*
+  10. Create a root stacking context
+*/
+#root,
+#__next {
+  isolation: isolate;
+}
+
+/* ============================= */
+/*            ROOT               */
+/* ============================= */
+
+:root {
+  /* ===== Color Palette (Generic Tokens) ===== */
+
+  --color-primary: #ff9800;
+  --color-secondary: #ffc107;
+  --color-accent: #d83c3c;
+
+  --color-bg: #fafafa;
+  --color-surface: #ffffff;
+
+  --color-text-primary: #1e1e1e;
+  --color-text-secondary: #616161;
+  --color-text-inverse: #ffffff;
+
+  --color-border: #e5e5e5;
+
+  --color-symbol: pink;
+
+  /* ===== Spacing Scale (8px system) ===== */
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 32px;
+  --space-6: 48px;
+  --space-7: 64px;
+
+  /* ===== Border Radius ===== */
+
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  /* ===== Elevation ===== */
+
+  --shadow-1: 0 6px 18px rgba(0, 0, 0, 0.08);
+  --shadow-2: 0 20px 40px rgba(0, 0, 0, 0.15);
+
+  /* ===== Typography Scale ===== */
+
+  --font-family: "Poppins", sans-serif;
+
+  --fs-base: 16px; /* 16px */
+
+  --fs-xs: 0.75rem; /* 12px */
+  --fs-sm: 0.875rem; /* 14px */
+  --fs-md: 1rem; /* 16px */
+  --fs-lg: 1.25rem; /* 20px */
+  --fs-xl: 1.75rem; /* 28px */
+
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  /* ===== Layout ===== */
+  --cell-size: 100px;
+}
+
+/* ============================= */
+/*          TYPOGRAPHY          */
+/* ============================= */
+
+h1 {
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-semibold);
+}
+
+h2 {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-semibold);
+}
+
+p {
+  font-size: var(--fs-sm);
+}
+
+/* ============================= */
+/*            BODY               */
+/* ============================= */
+
+body {
+  font-family: var(--font-family);
+  font-size: var(--fs-md);
+  color: var(--color-text-primary);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.board {
+  display: grid;
+  gap: var(--space-1);
+  grid-template-columns: repeat(3, var(--cell-size));
+}
+
+.cell {
+  width: var(--cell-size);
+  height: var(--cell-size);
+  border: 1px solid red;
+  border-radius: var(--radius-md);
+
+  color: var(--color-symbol);
+}
+
+.symbol {
+  width: var(--cell-size);
+  height: var(--cell-size);
+}
