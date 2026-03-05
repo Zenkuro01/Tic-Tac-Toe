@@ -92,13 +92,13 @@ h6 {
   --color-bg: #fafafa;
   --color-surface: #ffffff;
 
-  --color-text-primary: #1e1e1e;
+  --color-text-primary: #3a3a3a;
   --color-text-secondary: #616161;
   --color-text-inverse: #ffffff;
 
   --color-border: #e5e5e5;
 
-  --color-symbol: pink;
+  --color-symbol: var(--color-primary);
 
   /* ===== Spacing Scale (8px system) ===== */
 
@@ -118,8 +118,11 @@ h6 {
 
   /* ===== Elevation ===== */
 
-  --shadow-1: 0 6px 18px rgba(0, 0, 0, 0.08);
-  --shadow-2: 0 20px 40px rgba(0, 0, 0, 0.15);
+  --shadow-1: 0 6px 15px rgba(0, 0, 0, 0.08);
+  --shadow-2: 0 20px 25px rgba(0, 0, 0, 0.15);
+
+  --cell-shadow-1: 0 0 10px rgba(0, 0, 0, 0.08);
+  --cell-shadow-2: 0 0 30px rgba(0, 0, 0, 0.15);
 
   /* ===== Typography Scale ===== */
 
@@ -132,6 +135,7 @@ h6 {
   --fs-md: 1rem; /* 16px */
   --fs-lg: 1.25rem; /* 20px */
   --fs-xl: 1.75rem; /* 28px */
+  --fs-xxl: 2rem; /* 32px */
 
   --fw-regular: 400;
   --fw-medium: 500;
@@ -140,6 +144,8 @@ h6 {
 
   /* ===== Layout ===== */
   --cell-size: 100px;
+  --button-width: 140px;
+  --button-height: 50px;
 }
 
 /* ============================= */
@@ -147,8 +153,11 @@ h6 {
 /* ============================= */
 
 h1 {
-  font-size: var(--fs-xl);
-  font-weight: var(--fw-semibold);
+  font-size: var(--fs-xxl);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.1rem;
+  text-decoration: underline;
 }
 
 h2 {
@@ -160,38 +169,136 @@ p {
   font-size: var(--fs-sm);
 }
 
-/* ============================= */
-/*            BODY               */
-/* ============================= */
-
 body {
   font-family: var(--font-family);
   font-size: var(--fs-md);
   color: var(--color-text-primary);
+  background-color: var(--color-bg);
 
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: var(--space-3);
+
+  margin: var(--space-5);
 }
 
 .board {
   display: grid;
-  gap: var(--space-1);
+  gap: var(--space-2);
   grid-template-columns: repeat(3, var(--cell-size));
 }
 
 .cell {
   width: var(--cell-size);
   height: var(--cell-size);
-  border: 1px solid red;
   border-radius: var(--radius-md);
 
   color: var(--color-symbol);
+  background-color: var(--color-surface);
+  box-shadow: var(--cell-shadow-1);
+  transition: all 0.1s ease-in-out;
+}
+
+.enabled > .cell:hover {
+  box-shadow: var(--cell-shadow-2);
+  transform: scale(1.05);
 }
 
 .symbol {
   width: var(--cell-size);
   height: var(--cell-size);
+}
+
+.scoreboard {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-5);
+}
+.player {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+
+  padding: var(--space-3);
+
+  background-color: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-1);
+
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.1rem;
+
+  transition: all 0.1 ease-in-out;
+}
+
+.player-score {
+  font-size: var(--fs-xl);
+}
+
+.round {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.1rem;
+
+  margin-top: var(--space-3);
+}
+
+.board-container {
+  position: relative;
+}
+
+.btn {
+  border: none;
+  outline: none;
+  cursor: pointer;
+
+  width: var(--button-width);
+  height: var(--button-height);
+
+  background-color: var(--color-secondary);
+  border-radius: var(--radius-sm);
+
+  border: var(--color-border);
+  padding: var(--space-2) var(--space-5);
+
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.05rem;
+
+  box-shadow: var(--shadow-1);
+
+  transition: all 0.1s ease-in-out;
+
+  position: absolute;
+  top: calc(50% - (var(--button-height) / 2));
+  left: calc(50% - (var(--button-width) / 2));
+}
+
+.btn:hover {
+  box-shadow: var(--shadow-2);
+}
+
+.btn:active {
+  transform: scale(0.95);
+}
+
+.hidden {
+  display: none;
+}
+
+.active {
+  background-color: var(--color-secondary);
 }

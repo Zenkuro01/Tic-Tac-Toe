@@ -3,11 +3,21 @@
 /* ============================= */
 
 function Player(symbol) {
+  let score = 0;
+
   const getSymbol = () => {
     return symbol;
   };
 
-  return { getSymbol };
+  const increaseScore = () => {
+    score++;
+  };
+
+  const getScore = () => {
+    return score;
+  };
+
+  return { getSymbol, increaseScore, getScore };
 }
 
 const Symbol = {
@@ -67,16 +77,24 @@ function Gameboard() {
 }
 
 /* ============================= */
-/*           Game Object         */
+/*           Game Module         */
 /* ============================= */
 
 const Game = (function () {
+  const GameState = {
+    IDLE: "idle",
+    PLAYING: "playing",
+    WON: "won",
+    DRAW: "draw",
+  };
+
   const playerX = Player(Symbol.X);
   const playerO = Player(Symbol.O);
 
-  let gameboard = null;
+  let gameboard = Gameboard();
   let currentPlayer = null;
-  let gameOver = false;
+  let state = GameState.IDLE;
+  let round = 0;
 
   const winningPatterns = [
     [0, 1, 2],
@@ -90,12 +108,12 @@ const Game = (function () {
   ];
 
   // Create a Gameboard with an empty board
-  const init = () => {
+  const start = () => {
     gameboard = Gameboard();
     currentPlayer = playerX;
+    state = GameState.PLAYING;
+    round++;
   };
-
-  init();
 
   // Set next Player for the turn
   const switchTurn = () => {
@@ -105,27 +123,29 @@ const Game = (function () {
 
   // Play next round
   const playRound = (index) => {
-    if (gameOver) {
-      return "invalid";
+    if (state !== GameState.PLAYING) {
+      console.error(
+        "The game is already over. Start a new game to continue...",
+      );
+      return 1;
     }
 
-    if (!gameboard.setCell(index, currentPlayer.getSymbol())) {
-      console.error("The cell must be empty and a number between 0-8");
-      return "invalid";
-    }
+    const setCellResponse = gameboard.setCell(index, currentPlayer.getSymbol());
+    if (!setCellResponse) return 1;
 
     // Check win condition
     if (checkWin(currentPlayer.getSymbol())) {
-      gameOver = true;
-      return "win";
+      state = GameState.WON;
+      currentPlayer.increaseScore();
+      return 0;
     } else {
       // Check draw condition
       if (gameboard.isBoardFull()) {
-        gameOver = true;
-        return "draw";
+        state = GameState.DRAW;
+        return 0;
       } else {
         switchTurn();
-        return "continue";
+        return 0;
       }
     }
   };
@@ -150,11 +170,33 @@ const Game = (function () {
     return gameboard.getBoard();
   };
 
-  const isGameOver = () => {
-    return gameOver;
+  const getGameState = () => {
+    return state;
   };
 
-  return { playRound, getBoard, isGameOver };
+  const getRound = () => {
+    return round;
+  };
+
+  const getPlayersScore = () => {
+    return [playerX.getScore(), playerO.getScore()];
+  };
+
+  const getTurn = () => {
+    if (currentPlayer) return currentPlayer.getSymbol();
+    else return null;
+  };
+
+  return {
+    start,
+    playRound,
+    getBoard,
+    getGameState,
+    GameState,
+    getRound,
+    getPlayersScore,
+    getTurn,
+  };
 })();
 
 /* ============================= */
@@ -163,6 +205,14 @@ const Game = (function () {
 
 const DisplayController = (function () {
   const cellElements = document.querySelectorAll(".cell");
+  const startBtn = document.querySelector("#start-btn");
+  const boardElement = document.querySelector(".board");
+  const roundNumber = document.querySelector(".round-number");
+
+  const playerX = document.querySelector("#p1");
+  const playerO = document.querySelector("#p2");
+  const playerXScore = document.querySelector("#ps1");
+  const playerOScore = document.querySelector("#ps2");
 
   const svgMap = {
     X: `
@@ -187,23 +237,53 @@ const DisplayController = (function () {
 
       cell.innerHTML = svgMap[symbol] || "";
     });
+
+    roundNumber.textContent = Game.getRound();
+
+    const turn = Game.getTurn();
+
+    if (turn === Symbol.X) {
+      playerO.classList.remove("active");
+      playerX.classList.add("active");
+    } else if (turn === Symbol.O) {
+      playerX.classList.remove("active");
+      playerO.classList.add("active");
+    }
+
+    const [scoreX, scoreO] = Game.getPlayersScore();
+    playerXScore.textContent = scoreX;
+    playerOScore.textContent = scoreO;
+  };
+
+  const handleStartBtnClick = () => {
+    startBtn.classList.toggle("hidden");
+    boardElement.classList.toggle("enabled");
+
+    Game.start();
+    renderBoard();
   };
 
   const handleCellClick = (event) => {
     const cell = event.currentTarget;
     const index = Number(cell.dataset.index);
 
-    const response = Game.playRound(index);
+    if (Game.getGameState() === Game.GameState.PLAYING) {
+      Game.playRound(index);
 
-    // TODO Render UI based on the response
-    console.log(response);
+      if (Game.getGameState() !== Game.GameState.PLAYING) {
+        startBtn.classList.toggle("hidden");
+        boardElement.classList.toggle("enabled");
+      }
 
-    renderBoard();
+      renderBoard();
+    }
   };
 
   cellElements.forEach((cell) => {
     cell.addEventListener("click", handleCellClick);
   });
+
+  startBtn.addEventListener("click", handleStartBtnClick);
 
   renderBoard();
 })();
